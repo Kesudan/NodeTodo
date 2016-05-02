@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <meta charset="utf-8" />
+    <title>Login</title>
+</head>
+<body ng-app="todo-login">
+    <div ng-controller="todo-controller">
+        <form ng-submit="Login()">
+            Username: <input type="text" ng-model="fields.username" /><br />
+            Password: <input type="password" ng-model="fields.password" /><br />
+            <input type="submit" ng-model="submit" />
+        </form>
+
+        <h1>You entered: {{fields.username}}</h1>
+        <h1>You entered: {{fields.password}}</h1>
+        <h1>ERROR: {{fields.error}}</h1>
+    </div>
+</body>
+</html>
+
+<script>
+    var app = angular.module('todo-login', []);
+    app.controller('todo-controller', function ($scope, $http, $window) {
+        $scope.Login = function () {
+            var data = $scope.fields;
+            $scope.result = $http.post('/api/Login', data).then(function successCallback(response) {
+                // this callback will be called asynchronously
+                // when the response is available
+                
+                localStorage.setItem("username", data.username);
+                $window.location.href = './todo-node.html';
+
+            }, function errorCallback(response) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                $scope.fields.error = response.data;
+            });
+        }
+    });
+   
+</script>

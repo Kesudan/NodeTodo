@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+    <meta charset="utf-8" />
+    <title>ToDo Node App Testing</title>
+</head>
+<body ng-app="todo-main">
+    <h1>ToDo Node</h1><br/>
+
+    <div ng-controller="todo-display">
+        I have {{ToDo.length}} items ToDo. They are:
+        <input type="search" ng-model="q" placeholder="filter friends..." aria-label="filter friends" />
+        <ul class="example-animate-container">
+            <li class="animate-repeat" ng-repeat="td in ToDo  | filter:q as results" >
+                [{{$index + 1}}] {{td.Description}} scheduled for {{td.Date | date:'MM/dd/yyyy'}} Complete = {{td.Complete || 'false'}} <a href="" name="{{td._id}}" ng-click='Edit(td._id)'>Edit</a> ~ <a href="" name="{{td._id}}" ng-click='Delete(td._id)'>Delete</a>
+            </li>
+            <li class="animate-repeat" ng-if="results.length == 0">
+                <strong>No results found...</strong>
+            </li>
+        </ul>
+    </div>
+
+    <div id="show" ng-controller="todo-display">
+
+    </div>
+
+
+    <div id="post">
+        <form ng-controller="todo-post" novalidate name="form" ng-submit="Posttodo()">
+            <fieldset>
+                <legend>Posting Form</legend>
+                Description:
+                <input type="text" name="Description" ng-model="fields.Description"  required />
+                <span style="color:red" ng-show="submitted && form.description.$invalid && form.description.$error.required">Description is required </span>
+                <br />
+                Due By:
+                <input type="Date" name="Date" ng-model="fields.Date" required />
+                <span style="color:red" ng-show="submitted && form.date.$invalid && form.date.$error.required">Date is required </span>
+                <br />
+                File:
+                <input type="file" name="File" ng-model="fields.File" />
+                <br />
+                Complete:
+                <input type="checkbox" name="Complete" ng-model="fields.Complete" /> 
+                <br />
+                <input type="submit" ng-click="submitted=true" />
+            </fieldset>
+        </form>
+    </div>
+
+    
+</body>
+</html>
+
+<script>
+    var app = angular.module("todo-main", []);
+
+    //SERVICE
+    app.run(function ($rootScope) {
+        /*
+            Receive emitted message and broadcast it.
+            Event names must be distinct or browser will blow up!
+        */
+        $rootScope.$on('handleEmit', function (event, args) {
+            $rootScope.$broadcast('handleBroadcast', args);
+        });
+    });
+
+    //CONTROLLER 1 - POST MODULE
+    app.controller('todo-post', function ($scope, $http, $window, $filter) {
+
+        //SetupFields
+        $scope.fields = {};
+        $scope.fields.Description = "Enter description...";
+        $scope.fields.Date = null;
+        $scope.fields.File = null;
+        $scope.fields.Complete = false;
+        $scope.fields.ID = "";
+
+
+        $scope.Posttodo = function () {
+            if (!$scope.form.$valid) { return; };
+            
+            //NEEDS USER TO POST
+            if (!localStorage.getItem("username")) { $window.location.href = './todo-login.html'; return; }
+            var data = $scope.fields;
+            data.Username = localStorage.getItem("username");
+
+            var formattedData = JSON.stringify(data);
+            if (!$scope.fields.ID) {
+                $scope.result = $http.post('/api/ToDo', data).then(function successCallback(response) {
+                    //Reload page - Can't be arsed with dynamic refresh
+                    location.reload();
+                }, function errorCallback(response) {
+                    //Display error
+                });
+            }
+            else {
+                $scope.result = $http.put('/api/ToDo', data).then(function successCallback(response) {
+                    //Reload page - Can't be arsed with dynamic refresh
+                    location.reload();
+                }, function errorCallback(response) {
+                    //Display error
+                });
+            };
+
+            
+        };
+        $scope.$on('handleBroadcast', function (event, args) {
+            var ToDo = args.ToDo;
+            $scope.fields.Description = ToDo.Description;
+            $scope.fields.Date = new Date(ToDo.Date);
+            $scope.fields.File = ToDo.File;
+            $scope.fields.Complete = ToDo.Complete;
+            $scope.fields.ID = ToDo._id;
+        });
+    });
+
+    //CONTROLLER 2 DISPLAY MODULE
+    app.controller('todo-display', function ($scope, $http) {
+        //Get data for user
+        $scope.ToDo = new Array();
+
+        $http.get('/api/ToDo').then(function successCallback(response) {
+            $scope.ToDo = response.data;
+        }, function errorCallback(response) {
+
+        });
+
+        $scope.Edit = function (_id) {
+            var x = _id;
+            $scope.ToDo.forEach(function(ToDo){
+                if (ToDo._id == _id)
+                {
+                    $scope.$emit('handleEmit', { ToDo: ToDo });
+                    return;
+                }
+            });
+        };
+        $scope.Delete = function (_id) {
+
+            $scope.result = $http({
+                method: 'DELETE',
+                url: '/api/ToDo',
+                data: { "ID": _id },
+                headers: { 'Content-Type': 'application/json;charset=utf-8' }
+            }).then(function successCallback(response) {
+                    //Reload page - Can't be arsed with dynamic refresh
+                    location.reload();
+                }, function errorCallback(response) {
+                    //Display error
+                });
+        };
+    });
+
+</script>

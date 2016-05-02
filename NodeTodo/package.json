@@ -1,0 +1,16 @@
+{
+  "name": "node-todo",
+  "version": "0.0.0",
+  "description": "NodeTodo",
+  "main": "app.js",
+  "author": {
+    "name": "jamos",
+    "email": ""
+  },
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "ejs": "^2.4.1",
+    "express": "^4.13.4",
+    "mongoose": "^4.4.14"
+  }
+}
