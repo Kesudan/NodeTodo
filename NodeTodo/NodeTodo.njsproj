@@ -35,6 +35,9 @@
     <Compile Include="API\MongooseSchema.js" />
     <Compile Include="API\ToDo.js" />
     <Compile Include="app.js" />
+    <Compile Include="app\app.module.js" />
+    <Compile Include="app\compontents\todo\todo.display.js" />
+    <Compile Include="app\compontents\todo\todo.post.js" />
     <Compile Include="Config\index.js" />
     <Content Include="Config\config.json" />
     <Content Include="Public\todo-login.html" />
@@ -46,7 +49,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="API\" />
+    <Folder Include="app\compontents\" />
+    <Folder Include="app\compontents\todo\" />
+    <Folder Include="app\shared\" />
     <Folder Include="Config\" />
+    <Folder Include="app\" />
     <Folder Include="Views\" />
     <Folder Include="Public\" />
   </ItemGroup>

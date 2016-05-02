@@ -19,6 +19,7 @@ mongoose.connect(config.MongoConnectionString);
 
 // Static routes
 todoApp.use("/static", express.static("Public"));
+todoApp.use("/app", express.static("app"));
 
 // Create application/json parser
 var jsonParser = bodyparser.json()

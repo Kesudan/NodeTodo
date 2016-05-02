@@ -1,18 +1,31 @@
 ﻿var mongooseSchema = require("./MongooseSchema");
 var todoModel = mongooseSchema.todoModel;
 
+var Validate = function (err, data) {
+    if (err) {
+        res.status(400).send(err); 
+        return false;
+    }
+    if (!data) {
+        res.status(400).send("No data returned for request"); 
+        return false;
+    };
+
+    return true;
+};
+
 module.exports = function (req, res) {
     var todo = {
         GetToDo: function(callback) {
             todoModel.find({}, function (err, todos) {
+                if (!Validate(err, todo)) return;
+
                 res.send(todos);
             });
         },
         UpdateToDo: function (callback) {
             todoModel.findById(req.body.ID, function (err, todo) {
-                if (!callback) { callback = function (data) { } };
-                if (err) { return callback(err); }
-                if (!todo) { return callback("Could not find TODO.") }
+                if (!Validate(err, todo)) return;
 
                 var todoDoc = todo.toObject();
                 todo.Description = req.body.Description;
@@ -26,20 +39,17 @@ module.exports = function (req, res) {
         },
         DeleteToDo: function (callback) {
             todoModel.findByIdAndRemove(req.body.ID, function (err) {
-                if (!callback) { callback = function (data) { } };
-                if (err) { return callback(err); }
+                if (!Validate(err, todo)) return;
+
                 res.status(200).send('Received, captain!'); return;
             });
 
         },
         SaveToDo: function (callback) {
             todoModel.create(req.body, function (err, todo) {
-                if (!callback) { callback = function (data) { } };
-                if (err) { return callback(err); }
-                if (!todo) { return callback("Already exists; did not save.") }
+                if (!Validate(err, todo)) return;
 
                 var todoDoc = todo.toObject();
-
                 res.status(200).send('Received, captain!'); return;
             });
         },
